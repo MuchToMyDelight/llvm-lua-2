@@ -24,8 +24,8 @@
 
 #include <stdio.h>
 
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
 #include "llvm/PassManager.h"
 #include "llvm/Pass.h"
 #include "llvm/ADT/Triple.h"
@@ -91,11 +91,11 @@ namespace {
 }
 
 void print_version() {
-	printf(LLVM_LUA_VERSION " " LLVM_LUA_COPYRIGHT "\n");
-	printf(LUA_RELEASE "  " LUA_COPYRIGHT "\n");
-	llvm::cl::PrintVersionMessage();
-	printf("\n");
-	llvm::TargetRegistry::printRegisteredTargetsForVersion();
+    printf(LLVM_LUA_VERSION " " LLVM_LUA_COPYRIGHT "\n");
+    printf(LUA_RELEASE "  " LUA_COPYRIGHT "\n");
+    llvm::cl::PrintVersionMessage();
+    printf("\n");
+    llvm::TargetRegistry::printRegisteredTargetsForVersion();
 }
 
 /*
@@ -104,14 +104,14 @@ void print_version() {
 int main(int argc, char ** argv) {
   llvm::sys::PrintStackTraceOnErrorSignal();
   llvm::PrettyStackTraceProgram X(argc, argv);
-	std::vector<std::string> arg_list;
-	llvm::llvm_shutdown_obj Y;   // Call llvm_shutdown() on exit.
-	std::string tmp;
-	char **luac_argv;
-	int luac_argc=0;
-	int new_argc=0;
-	int pos;
-	int ret;
+    std::vector<std::string> arg_list;
+    llvm::llvm_shutdown_obj Y;   // Call llvm_shutdown() on exit.
+    std::string tmp;
+    char **luac_argv;
+    int luac_argc=0;
+    int new_argc=0;
+    int pos;
+    int ret;
 
   // Initialize targets first.
   llvm::InitializeAllTargets();
@@ -119,59 +119,59 @@ int main(int argc, char ** argv) {
   llvm::InitializeAllAsmPrinters();
   llvm::InitializeAllAsmParsers();
 
-	llvm::cl::SetVersionPrinter(print_version);
+    llvm::cl::SetVersionPrinter(print_version);
 
-	llvm::cl::ParseCommandLineOptions(argc, argv, "LLVM-Lua native compiler\n");
-	// Show version?
-	if(ShowVersion) {
-		print_version();
-		return 0;
-	}
-	// recreate arg list.
-	arg_list.push_back(argv[0]);
-	for(std::vector<std::string>::iterator I=Libraries.begin(); I != Libraries.end(); I++) {
-		pos = Libraries.getPosition(I - Libraries.begin());
-		// keep same format -llibrary or -l library
-		if(argv[pos][0] == '-' && argv[pos][1] == 'L') {
-			tmp = "-L";
-			tmp.append(*I);
-			arg_list.push_back(tmp);
-		} else {
-			arg_list.push_back("-L");
-			arg_list.push_back(*I);
-		}
-	}
-	if(Bitcode) {
-		arg_list.push_back("-bc");
-	}
-	for(std::vector<bool>::iterator I=ListOpcodes.begin(); I != ListOpcodes.end(); I++) {
-		arg_list.push_back("-l");
-	}
-	if(!Output.empty()) {
-		arg_list.push_back("-o");
-		arg_list.push_back(Output);
-	}
-	if(ParseOnly) {
-		arg_list.push_back("-p");
-	}
-	if(StripDebug) {
-		arg_list.push_back("-s");
-	}
-	arg_list.insert(arg_list.end(),InputFiles.begin(), InputFiles.end());
-	/* construct luac_argc, luac_argv. */
-	new_argc = arg_list.size() + 1;
-	luac_argv = (char **)calloc(new_argc, sizeof(char *));
-	for(std::vector<std::string>::iterator I=arg_list.begin(); I != arg_list.end(); I++) {
-		if(luac_argc == new_argc) break;
-		luac_argv[luac_argc] = (char *)(*I).c_str();
-		luac_argc++;
-	}
-	luac_argv[luac_argc] = NULL;
+    llvm::cl::ParseCommandLineOptions(argc, argv, "LLVM-Lua native compiler\n");
+    // Show version?
+    if(ShowVersion) {
+        print_version();
+        return 0;
+    }
+    // recreate arg list.
+    arg_list.push_back(argv[0]);
+    for(std::vector<std::string>::iterator I=Libraries.begin(); I != Libraries.end(); I++) {
+        pos = Libraries.getPosition(I - Libraries.begin());
+        // keep same format -llibrary or -l library
+        if(argv[pos][0] == '-' && argv[pos][1] == 'L') {
+            tmp = "-L";
+            tmp.append(*I);
+            arg_list.push_back(tmp);
+        } else {
+            arg_list.push_back("-L");
+            arg_list.push_back(*I);
+        }
+    }
+    if(Bitcode) {
+        arg_list.push_back("-bc");
+    }
+    for(std::vector<bool>::iterator I=ListOpcodes.begin(); I != ListOpcodes.end(); I++) {
+        arg_list.push_back("-l");
+    }
+    if(!Output.empty()) {
+        arg_list.push_back("-o");
+        arg_list.push_back(Output);
+    }
+    if(ParseOnly) {
+        arg_list.push_back("-p");
+    }
+    if(StripDebug) {
+        arg_list.push_back("-s");
+    }
+    arg_list.insert(arg_list.end(),InputFiles.begin(), InputFiles.end());
+    /* construct luac_argc, luac_argv. */
+    new_argc = arg_list.size() + 1;
+    luac_argv = (char **)calloc(new_argc, sizeof(char *));
+    for(std::vector<std::string>::iterator I=arg_list.begin(); I != arg_list.end(); I++) {
+        if(luac_argc == new_argc) break;
+        luac_argv[luac_argc] = (char *)(*I).c_str();
+        luac_argc++;
+    }
+    luac_argv[luac_argc] = NULL;
 
-	// initialize the Lua to LLVM compiler.
-	ret = llvm_compiler_main(0);
-	// Run the main Lua compiler
-	ret = luac_main(luac_argc, luac_argv);
-	return ret;
+    // initialize the Lua to LLVM compiler.
+    ret = llvm_compiler_main(0);
+    // Run the main Lua compiler
+    ret = luac_main(luac_argc, luac_argv);
+    return ret;
 }
 
