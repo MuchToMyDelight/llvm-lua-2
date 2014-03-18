@@ -22,21 +22,21 @@
   MIT License: http://www.opensource.org/licenses/mit-license.php
 */
 
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/PassManager.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/Utils/Cloning.h"
-#include "llvm/Support/Timer.h"
-#include "llvm/Support/CommandLine.h"
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/PassManager.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Target/TargetOptions.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/IPO.h>
+#include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Support/Timer.h>
+#include <llvm/Support/CommandLine.h>
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 #include "LLVMCompiler.h"
 #ifdef __cplusplus
@@ -341,7 +341,8 @@ LLVMCompiler::LLVMCompiler(int useJIT) {
         llvm::TargetOptions options;
         options.GuaranteedTailCallOpt = true;
         options.JITEmitDebugInfo = false;
-        options.JITExceptionHandling = false;
+        // FIXME
+        //options.JITExceptionHandling = false;
         engine.setTargetOptions(options);
 
         llvm::CodeGenOpt::Level optLevel = llvm::CodeGenOpt::Aggressive;
@@ -382,11 +383,12 @@ LLVMCompiler::LLVMCompiler(int useJIT) {
          */
         // Set up the optimizer pipeline.  Start with registering info about how the
         // target lays out data structures.
-        if(useJIT) {
-            TheFPM->add(new llvm::TargetData(*TheExecutionEngine->getTargetData()));
-        } else {
-            TheFPM->add(new llvm::TargetData(M));
-        }
+        // FIXME
+//        if(useJIT) {
+//            TheFPM->add(new llvm::TargetData(*TheExecutionEngine->getTargetData()));
+//        } else {
+//            TheFPM->add(new llvm::TargetData(M));
+//        }
         // mem2reg
         TheFPM->add(llvm::createPromoteMemoryToRegisterPass());
         // Do simple "peephole" optimizations and bit-twiddling optzns.
@@ -395,7 +397,8 @@ LLVMCompiler::LLVMCompiler(int useJIT) {
         TheFPM->add(llvm::createDeadCodeEliminationPass());
         if(OptLevel > 2) {
             // BlockPlacement
-            TheFPM->add(llvm::createBlockPlacementPass());
+            // FIXME
+            // TheFPM->add(llvm::createBlockPlacementPass());
             // Reassociate expressions.
             TheFPM->add(llvm::createReassociatePass());
             // Simplify the control flow graph (deleting unreachable blocks, etc).
