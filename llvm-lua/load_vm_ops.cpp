@@ -1,16 +1,16 @@
 /*
   Copyright (c) 2009 Robert G. Jakabosky
-  
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
-  
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
-  
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,8 +24,8 @@
 
 #include <stdlib.h>
 
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
 
 #include "load_vm_ops.h"
 #include "load_embedded_bc.h"
@@ -33,7 +33,7 @@
 #include "lua_vm_ops_bc.h"
 
 llvm::Module *load_vm_ops(llvm::LLVMContext &context, bool NoLazyCompilation) {
-	return load_embedded_bc(context, "lua_vm_ops_bc", lua_vm_ops_bc,
-		sizeof(lua_vm_ops_bc), NoLazyCompilation);
+    return load_embedded_bc(context, "lua_vm_ops_bc", lua_vm_ops_bc,
+        sizeof(lua_vm_ops_bc), NoLazyCompilation);
 }
 
