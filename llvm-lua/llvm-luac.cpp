@@ -34,7 +34,7 @@
 #include "llvm/CodeGen/LinkAllAsmWriterComponents.h"
 #include "llvm/CodeGen/LinkAllCodegenComponents.h"
 #include "llvm/Config/config.h"
-#include "llvm/LinkAllVMCore.h"
+//#include "llvm/LinkAllVMCore.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileUtilities.h"
 #include "llvm/Support/FormattedStream.h"
@@ -45,7 +45,7 @@
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/TargetRegistry.h"
-#include "llvm/Target/TargetData.h"
+//#include "llvm/Target/TargetData.h"
 #include "llvm/Target/TargetMachine.h"
 
 #include "llvm_compiler.h"

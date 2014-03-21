@@ -25,11 +25,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "llvm/IR/Module.h"
-#include "llvm/IR/LLVMContext.h"
-
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Bitcode/ReaderWriter.h"
+#include <llvm/IR/Module.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
 #include <string>
 
