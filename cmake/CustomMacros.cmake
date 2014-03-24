@@ -28,7 +28,7 @@ macro(add_llvm_bc_library _target)
 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 			DEPENDS ${ARGV1}
 		)
-	endif(${ARGC} GREATER 2)
+	endif()
 endmacro(add_llvm_bc_library)
 
 macro(add_target_properties _target _name)
@@ -40,7 +40,7 @@ macro(add_target_properties _target _name)
 	if(NOT _old_properties)
 		# in case it's NOTFOUND
 		set(_old_properties)
-	endif(NOT _old_properties)
+	endif()
 	set_target_properties(${_target} PROPERTIES ${_name} "${_old_properties} ${_properties}")
 endmacro(add_target_properties)
 

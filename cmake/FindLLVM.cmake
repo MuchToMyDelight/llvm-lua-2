@@ -5,7 +5,13 @@
 #  LLVM_LIBRARIES   - List of libraries when using libev.
 #  LLVM_FOUND       - True if libev found.
 
-find_program(LLVM_CONFIG_EXECUTABLE NAMES "${LLVM_PATH}/bin/llvm-config-3.4" DOC "llvm-config executable")
+set(LLVM_CONFIG_EXECUTABLE "${LLVM_PATH}/bin/llvm-config")
+
+if(EXISTS ${LLVM_CONFIG_EXECUTABLE})
+    message(STATUS "Use ${LLVM_CONFIG_EXECUTABLE}")
+else()
+    message(FATAL_ERROR "can't find ${LLVM_CONFIG_EXECUTABLE}")
+endif()
 
 execute_process(
         COMMAND ${LLVM_CONFIG_EXECUTABLE} --cppflags
@@ -28,4 +34,8 @@ execute_process(
         OUTPUT_VARIABLE LLVM_ALL_LIBS
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
+execute_process(
+        COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
+        OUTPUT_VARIABLE LLVM_LIBDIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)

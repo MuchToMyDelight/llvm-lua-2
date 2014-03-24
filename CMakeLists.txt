@@ -3,13 +3,23 @@
 #
 cmake_minimum_required(VERSION 2.8)
 
-project(llvm_lua C CXX)
+project(llvm_lua)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(CustomMacros)
 include(CMakeDependentOption)
+#
+# llvm-lua options.
+#
+option(LUA_CPP_SUPPORT "Enable c++ support" OFF)
+set(LLVM_PATH "/opt/llvm_3.4_debug/" CACHE STRING "Path to LLVM/Clang.")
+set(LLVM_CC "${LLVM_PATH}/bin/clang" CACHE STRING "Command to compile C-code to LLVM bitcode (clang or llvm-gcc)")
+set(LLVM_LD "${LLVM_PATH}/bin/llvm-link" CACHE STRING "Command to link LLVM bitcode files into one bitcode file.")
 include(FindLLVM)
+
+
+set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES ${LLVM_LIBDIR})
 
 enable_testing()
 
@@ -62,84 +72,38 @@ set(LIBS)
 #
 # Detect system type
 #
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(DEFAULT_POSIX TRUE)
-        set(DEFAULT_DLOPEN ON)
-        set(DEFAULT_READLINE ON)
-        set(COMMON_LDFLAGS "${COMMON_LDFLAGS} -Wl,-E")
-        set(USE_RPATH TRUE)
-        # This is a HACK.  We need to put the flags from `llvm-config --lflags` at
-        # the end of the linker command.  If you know a better way to fix this let
-        # me know.
-        set(CMAKE_CXX_LINK_EXECUTABLE
-                "<CMAKE_CXX_COMPILER>  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> <LINK_FLAGS>")
-        SET(CMAKE_C_LINK_EXECUTABLE
-                "<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> <LINK_FLAGS>")
-elseif(APPLE)
-        set(DEFAULT_POSIX TRUE)
-        set(DEFAULT_DLOPEN ON)
-        # use this on Mac OS X 10.3-
-        option(LUA_USE_MACOSX "Mac OS X 10.3-" OFF)
-        set(OSX_ARCHITECTURES "x86_64" CACHE STRING "Build architectures for OSX")
-        CMAKE_DEPENDENT_OPTION(WANT_FRAMEWORK
-                "Set to ON to build framework instead of dylib." ON
-                "WANT_SHARED_LIBRARY" ON
-        )
-        CMAKE_DEPENDENT_OPTION(LUA_FRAMEWORK_SYMLINKS
-                "Set to ON to create symlinks to llvm-lua & llvm-luac to CMAKE_PREFIX_PATH/bin." ON
-                "WANT_FRAMEWORK;WANT_SHARED_LIBRARY" ON
-        )
-        set(CMAKE_FRAMEWORK_INSTALL_DIR "/Library/Frameworks" CACHE STRING "Directory to install frameworks to.")
-        set(CMAKE_FRAMEWORK_INSTALL_NAME_DIR "@executable_path/../Frameworks" CACHE STRING "install_name path for framework.")
-        set(CMAKE_DYLIB_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "install_name path for dylib.")
-        set(LUA_FRAMEWORK_NAME "llvm-lua.framework")
-        set(LUA_FRAMEWORK_VERSION_NUMBER "${LLVM_LUA_VERSION_MAJOR}.${LLVM_LUA_VERSION_MINOR}")
-        set(LUA_FRAMEWORK_VERSIONED_EXECUTABLE_DIR "Versions/${LUA_FRAMEWORK_VERSION_NUMBER}/MacOS")
-        set(LUA_FRAMEWORK_VERSIONED_LIB_DIR "Versions/${LUA_FRAMEWORK_VERSION_NUMBER}/lib")
-        set(LUA_FRAMEWORK_CURRENT_EXECUTABLE_DIR "Versions/Current/MacOS")
 
-        # For Apple install_name, is it better to detect if Xcode vs Makefile?
-        # Xcode default=1, Makefile=0? Or detect if Framework vs. dylib,
-        # Framework=1, dylib=0?
-        option(CMAKE_BUILD_WITH_INSTALL_RPATH "Set to YES to set the rpath or install_name on build instead of install." ON)
+set(DEFAULT_POSIX TRUE)
+set(DEFAULT_DLOPEN ON)
+set(DEFAULT_READLINE ON)
+set(COMMON_LDFLAGS "${COMMON_LDFLAGS} -Wl,-E")
+set(USE_RPATH TRUE)
+# This is a HACK.  We need to put the flags from `llvm-config --lflags` at
+# the end of the linker command.  If you know a better way to fix this let
+# me know.
+set(CMAKE_CXX_LINK_EXECUTABLE
+        "<CMAKE_CXX_COMPILER>  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> <LINK_FLAGS>")
+SET(CMAKE_C_LINK_EXECUTABLE
+        "<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> <LINK_FLAGS>")
 
-        set(LUA_SOVERSION
-                                "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.0")
-elseif(CYGWIN)
-        set(DEFAULT_POSIX TRUE)
-        set(USE_RPATH TRUE)
-elseif(UNIX)
-        set(DEFAULT_POSIX TRUE)
-        set(USE_RPATH TRUE)
-elseif(WIN32)
-        set(LUA_WIN TRUE)
-        set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_BUILD_AS_DLL")
-else(APPLE)
-        set(DEFAULT_ANSI TRUE)
-endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 #
 # setup config options with default values.
 #
 option(WANT_SHARED_LIBRARY "Set to ON to build dynamic library." ON)
-if(WIN32)
-        set(WANT_STATIC_LIBRARY OFF)
-else(WIN32)
-        option(WANT_STATIC_LIBRARY "Set to ON to build static library." ON)
-endif(WIN32)
-
+option(WANT_STATIC_LIBRARY "Set to ON to build static library." ON)
 option(WANT_NOJIT_LIBRARIES "Set to ON to build nojit libraries." ON)
 
 if(USE_RPATH)
         set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "rpaths separated by semicolons.")
         option(CMAKE_BUILD_WITH_INSTALL_RPATH "Set to YES to set the rpath or install_name on build instead of install." OFF)
-endif(USE_RPATH)
+endif()
 
 if(DEFAULT_DLOPEN)
         option(LUA_USE_DLOPEN "Enable dlopen support." ON)
-else(DEFAULT_DLOPEN)
+else()
         option(LUA_USE_DLOPEN "Enable dlopen support." OFF)
-endif(DEFAULT_DLOPEN)
+endif()
 
 if(DEFAULT_POSIX)
         option(LUA_USE_CURSES "Enable Curses support." ON)
@@ -147,35 +111,27 @@ if(DEFAULT_POSIX)
         option(LUA_USE_ISATTY "Enable isatty support." ON)
         option(LUA_USE_POPEN "Enable lua_popen support." ON)
         option(LUA_USE_ULONGJMP "Try using _longjmp/_setjmp (more efficient)" ON)
-else(DEFAULT_POSIX)
+else()
         option(LUA_USE_CURSES "Enable Curses support." OFF)
         option(LUA_USE_MKSTEMP "Use mkstemp." OFF)
         option(LUA_USE_ISATTY "Enable isatty support." OFF)
         option(LUA_USE_POPEN "Enable lua_popen support." OFF)
         option(LUA_USE_ULONGJMP "Try using _longjmp/_setjmp (more efficient)" OFF)
-endif(DEFAULT_POSIX)
+endif()
 
 if(DEFAULT_READLINE)
         option(LUA_USE_READLINE "Enable readline support." ON)
-else(DEFAULT_READLINE)
+else()
         option(LUA_USE_READLINE "Enable readline support." OFF)
-endif(DEFAULT_READLINE)
+endif()
 
 if(DEFAULT_ANSI)
         option(LUA_ANSI "Disable non-ansi features." ON)
-else(DEFAULT_ANSI)
+else()
         option(LUA_ANSI "Disable non-ansi features." OFF)
-endif(DEFAULT_ANSI)
+endif()
 
 option(LUA_USE_APICHECK "Enable API checks." OFF)
-
-#
-# llvm-lua options.
-#
-option(LUA_CPP_SUPPORT "Enable c++ support" OFF)
-set(LLVM_PATH "/usr" CACHE STRING "Path to LLVM/Clang.")
-set(LLVM_CC "${LLVM_PATH}/bin/clang" CACHE STRING "Command to compile C-code to LLVM bitcode (clang or llvm-gcc)")
-set(LLVM_LD "${LLVM_PATH}/bin/llvm-link" CACHE STRING "Command to link LLVM bitcode files into one bitcode file.")
 
 #
 # Cross-compile options.
@@ -202,37 +158,31 @@ set(COCO_DEFAULT_CSTACKSIZE "" CACHE STRING "Coco default cstacksize")
 #
 set(COMMON_LDFLAGS "${COMMON_LDFLAGS} -lm ")
 
-# For "Mac OS X 10.3-"
-if(LUA_USE_MACOSX)
-        set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_MACOSX")
-        set(LUA_USE_DLOPEN FALSE)
-endif(LUA_USE_MACOSX)
-
 # enable options
 if(LUA_USE_DLOPEN)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_DLOPEN")
         if(NOT APPLE)
                 set(COMMON_LDFLAGS "${COMMON_LDFLAGS} -ldl ")
-        endif(NOT APPLE)
-endif(LUA_USE_DLOPEN)
+        endif()
+endif()
 if(LUA_USE_MKSTEMP)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_MKSTEMP")
-endif(LUA_USE_MKSTEMP)
+endif()
 if(LUA_USE_ISATTY)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_ISATTY")
-endif(LUA_USE_ISATTY)
+endif()
 if(LUA_USE_POPEN)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_POPEN")
-endif(LUA_USE_POPEN)
+endif()
 if(LUA_USE_ULONGJMP)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_ULONGJMP")
-endif(LUA_USE_ULONGJMP)
+endif()
 if(LUA_USE_APICHECK)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_APICHECK")
-endif(LUA_USE_APICHECK)
+endif()
 if(LUA_ANSI)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_ANSI")
-endif(LUA_ANSI)
+endif()
 
 # readline support
 if(LUA_USE_READLINE AND NOT CROSS_COMPILE)
@@ -242,7 +192,7 @@ if(LUA_USE_READLINE AND NOT CROSS_COMPILE)
                 set(COMMON_CFLAGS "${COMMON_CFLAGS} -DLUA_USE_READLINE")
                 set(COMMON_LDFLAGS "${COMMON_LDFLAGS} -lreadline -lhistory")
                 include_directories(${READLINE_INCLUDE_DIR})
-        endif(READLINE_LIBRARY)
+        endif()
 endif()
 
 # curses
@@ -251,24 +201,24 @@ if(LUA_USE_CURSES AND NOT CROSS_COMPILE)
         if(CURSES_LIBRARY)
                 include_directories(${CURSES_INCLUDE_DIR})
                 set(LIBS ${LIBS} ${CURSES_LIBRARY})
-        endif(CURSES_LIBRARY)
+        endif()
 endif()
 
 # LuaCoco flags
 if(COCO_DISABLE)
         set(COMMON_CFLAGS "${COMMON_CFLAGS} -DCOCO_DISABLE")
-else(COCO_DISABLE)
+else()
         if(COCO_USE_SETJMP)
                 set(COMMON_CFLAGS "${COMMON_CFLAGS} -DCOCO_USE_SETJMP")
         elseif(COCO_USE_UCONTEXT)
                 set(COMMON_CFLAGS "${COMMON_CFLAGS} -DCOCO_USE_UCONTEXT")
-        endif(COCO_USE_SETJMP)
+        endif()
 
         # check cstacksize variable.
         if(COCO_DEFAULT_CSTACKSIZE)
                 set(COMMON_CFLAGS "${COMMON_CFLAGS} -DCOCO_DEFAULT_CSTACKSIZE=${COCO_DEFAULT_CSTACKSIZE}")
-        endif(COCO_DEFAULT_CSTACKSIZE)
-endif(COCO_DISABLE)
+        endif()
+endif()
 
 #
 # Support for embedding llvm-lua into c++ programs with exception support.
@@ -279,7 +229,7 @@ if(LUA_CPP_SUPPORT)
         include(CMakeForceCompiler)
         CMAKE_FORCE_C_COMPILER(${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ID})
         set(LLVM_CC "llvm-g++")
-endif(LUA_CPP_SUPPORT)
+endif()
 
 #
 # standard flags to use for each build type.
@@ -290,14 +240,14 @@ if(CMAKE_COMPILER_IS_GNUCC)
         set(CMAKE_C_FLAGS_DEBUG          "${CMAKE_C_FLAGS_DEBUG}       -O0 -g")
         set(CMAKE_C_FLAGS_PROFILE        "${CMAKE_C_FLAGS_PROFILE}     -O1 -g")
         set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_WITHDEBINFO} -O2 -g")
-endif(CMAKE_COMPILER_IS_GNUCC)
+endif()
 if(CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pipe -Wall -Wshadow -W -pedantic")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++11 -pipe -Wall -Wshadow -W -pedantic")
         set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE}     -O2")
         set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG}       -O0 -g")
         set(CMAKE_CXX_FLAGS_PROFILE        "${CMAKE_CXX_FLAGS_PROFILE}     -O2 -g")
         set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_WITHDEBINFO} -O2 -g")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+endif()
 
 #
 # For uninstall (needs cmake_uninstall.cmake.in in the top-level directory)
