@@ -37,9 +37,8 @@
 llvm::Module *load_embedded_bc(llvm::LLVMContext &context,
     const char *name, const unsigned char *start, size_t len, bool NoLazyCompilation)
 {
-    llvm::Module *module = NULL;
+    llvm::ErrorOr<llvm::Module *> module = NULL;
     llvm::StringRef mem_ref((const char *)start, len - 1);
-    std::string error;
 
     // Load in the bitcode file containing the functions for each
     // bytecode operation.
@@ -58,12 +57,12 @@ llvm::Module *load_embedded_bc(llvm::LLVMContext &context,
     }
     // Materialize module
     if(NoLazyCompilation) {
-        if(module->MaterializeAll(&error)) {
-            printf("Failed to materialize embedded '%s' file: %s\n", name, error.c_str());
+        if(module.get()->materializeAll() ) {
+            printf("Failed to materialize embedded '%s' file\n", name);
             exit(1);
         }
     }
 
-    return module;
+    return module.get();
 }
 

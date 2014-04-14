@@ -25,9 +25,10 @@
 #ifndef LLVMCOMPILER_h
 #define LLVMCOMPILER_h
 
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/LLVMContext.h"
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/PassManager.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/LLVMContext.h>
 
 #include "lua_core.h"
 
@@ -44,7 +45,6 @@ extern "C" {
 #endif
 
 namespace llvm {
-class FunctionPassManager;
 class ExecutionEngine;
 class Timer;
 }
