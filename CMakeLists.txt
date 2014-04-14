@@ -13,7 +13,7 @@ include(CMakeDependentOption)
 # llvm-lua options.
 #
 option(LUA_CPP_SUPPORT "Enable c++ support" OFF)
-set(LLVM_PATH "/opt/llvm_3.4_debug/" CACHE STRING "Path to LLVM/Clang.")
+set(LLVM_PATH "/mnt/disk/llvm_snapshot/" CACHE STRING "Path to LLVM/Clang.")
 set(LLVM_CC "${LLVM_PATH}/bin/clang" CACHE STRING "Command to compile C-code to LLVM bitcode (clang or llvm-gcc)")
 set(LLVM_LD "${LLVM_PATH}/bin/llvm-link" CACHE STRING "Command to link LLVM bitcode files into one bitcode file.")
 include(FindLLVM)
