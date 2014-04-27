@@ -1,16 +1,16 @@
 /*
   Copyright (c) 2009 Robert G. Jakabosky
-  
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
-  
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
-  
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,6 @@
 #ifndef LLVMDUMPER_h
 #define LLVMDUMPER_h
 
-#include "llvm/Module.h"
 #include "lua_core.h"
 
 #ifdef __cplusplus
@@ -51,52 +50,52 @@ class LLVMCompiler;
 
 class LLVMDumper {
 private:
-	LLVMCompiler *compiler;
-	llvm::Module *M;
+    LLVMCompiler *compiler;
+    llvm::Module *M;
 
-	// types.
-	llvm::Type *Ty_str_ptr;
-	llvm::StructType *Ty_constant_value;
-	llvm::StructType *Ty_constant_type;
-	llvm::Type *Ty_constant_type_ptr;
-	llvm::StructType *Ty_constant_num_type;
-	llvm::Constant *num_padding;
-	llvm::StructType *Ty_constant_bool_type;
-	llvm::Constant *bool_padding;
-	llvm::StructType *Ty_constant_str_type;
-	llvm::Constant *str_padding;
-	llvm::StructType *Ty_jit_LocVar;
-	llvm::Type *Ty_jit_LocVar_ptr;
-	llvm::StructType *Ty_jit_proto;
-	llvm::Type *Ty_jit_proto_ptr;
-	llvm::FunctionType *lua_func_type;
-	llvm::Type *lua_func_type_ptr;
+    // types.
+    llvm::Type *Ty_str_ptr;
+    llvm::StructType *Ty_constant_value;
+    llvm::StructType *Ty_constant_type;
+    llvm::Type *Ty_constant_type_ptr;
+    llvm::StructType *Ty_constant_num_type;
+    llvm::Constant *num_padding;
+    llvm::StructType *Ty_constant_bool_type;
+    llvm::Constant *bool_padding;
+    llvm::StructType *Ty_constant_str_type;
+    llvm::Constant *str_padding;
+    llvm::StructType *Ty_jit_LocVar;
+    llvm::Type *Ty_jit_LocVar_ptr;
+    llvm::StructType *Ty_jit_proto;
+    llvm::Type *Ty_jit_proto_ptr;
+    llvm::FunctionType *lua_func_type;
+    llvm::Type *lua_func_type_ptr;
 
 public:
-	LLVMDumper(LLVMCompiler *compiler);
+    LLVMDumper(LLVMCompiler *compiler);
 
-	void dump(const char *output, lua_State *L, Proto *p, int stripping);
+    void dump(const char *output, lua_State *L, Proto *p, int stripping);
 
-	llvm::LLVMContext& getCtx() const {
-		return compiler->getCtx();
-	}
+    llvm::LLVMContext& getCtx() const {
+        return compiler->getCtx();
+    }
 
 private:
-	llvm::Constant *get_ptr(llvm::Constant *val);
+    llvm::Constant *get_ptr(llvm::Constant *val);
 
-	llvm::Constant *get_global_str(const char *str);
+    llvm::Constant *get_global_str(const char *str);
 
-	llvm::GlobalVariable *dump_constants(Proto *p);
+    llvm::GlobalVariable *dump_constants(Proto *p);
 
-	llvm::GlobalVariable *dump_locvars(Proto *p);
+    llvm::GlobalVariable *dump_locvars(Proto *p);
 
-	llvm::GlobalVariable *dump_upvalues(Proto *p);
+    llvm::GlobalVariable *dump_upvalues(Proto *p);
 
-	llvm::Constant *dump_proto(Proto *p);
+    llvm::Constant *dump_proto(Proto *p);
 
-	void dump_standalone(Proto *p);
+    void dump_standalone(Proto *p);
 
-	void dump_lua_module(Proto *p, std::string mod_name);
+    void dump_lua_module(Proto *p, std::string mod_name);
 
 };
 #endif

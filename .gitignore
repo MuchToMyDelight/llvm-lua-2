@@ -10,3 +10,5 @@ src/lua
 src/luac
 src/lua_test
 .*.swp
+*.user
+CMakeLists.txt.user*
