@@ -68,7 +68,7 @@ include(CPack)
 
 set(COMMON_CFLAGS)
 set(COMMON_LDFLAGS)
-set(LIBS)
+set(LIBS -lz)
 #
 # Detect system type
 #
